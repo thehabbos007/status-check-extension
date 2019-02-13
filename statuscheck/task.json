@@ -1,0 +1,30 @@
+{
+    "id": "b2ba3665-21b1-4032-88a9-d332cf4d6225",
+    "name": "status-check",
+    "friendlyName": "Status checks for GitHub",
+    "description": "Status checks for GitHub",
+    "helpMarkDown": "",
+    "category": "Utility",
+    "author": "thehabbos007",
+    "version": {
+        "Major": 0,
+        "Minor": 1,
+        "Patch": 0
+    },
+    "instanceNameFormat": "Echo $(samplestring)",
+    "inputs": [
+        {
+            "name": "samplestring",
+            "type": "string",
+            "label": "Sample String",
+            "defaultValue": "",
+            "required": true,
+            "helpMarkDown": "A sample string"
+        }
+    ],
+    "execution": {
+        "Node": {
+            "target": "index.js"
+        }
+    }
+}

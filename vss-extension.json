@@ -1,0 +1,36 @@
+{
+    "manifestVersion": 1,
+    "id": "status-check",
+    "name": "Status check for github",
+    "version": "0.0.1",
+    "publisher": "thehabbos007",
+    "targets": [
+        {
+            "id": "Microsoft.VisualStudio.Services"
+        }
+    ],    
+    "description": "post status checks.",
+    "categories": [
+        "Azure Pipelines"
+    ],
+    "icons": {
+        "default": "images/extension-icon.png"        
+    },
+    "files": [
+        {
+            "path": "statuscheck"
+        }
+    ],
+    "contributions": [
+        {
+            "id": "custom-build-release-task",
+            "type": "ms.vss-distributed-task.task",
+            "targets": [
+                "ms.vss-distributed-task.tasks"
+            ],
+            "properties": {
+                "name": "statusCheck"
+            }
+        }
+    ]
+}
