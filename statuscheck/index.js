@@ -34,24 +34,40 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
+    result["default"] = mod;
+    return result;
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 var tl = require("azure-pipelines-task-lib/task");
+var rm = __importStar(require("typed-rest-client/RestClient"));
 function run() {
     return __awaiter(this, void 0, void 0, function () {
-        var inputString;
+        var inputString, rest, res;
         return __generator(this, function (_a) {
-            try {
-                inputString = tl.getInput('samplestring', true);
-                if (inputString == 'bad') {
-                    tl.setResult(tl.TaskResult.Failed, 'Bad input was given');
+            switch (_a.label) {
+                case 0:
+                    try {
+                        inputString = tl.getInput('samplestring', true);
+                        if (inputString == 'bad') {
+                            tl.setResult(tl.TaskResult.Failed, 'Bad input was given');
+                            return [2 /*return*/];
+                        }
+                        console.log('Hello', inputString);
+                    }
+                    catch (err) {
+                        tl.setResult(tl.TaskResult.Failed, err.message);
+                    }
+                    rest = new rm.RestClient("todos", "http://localhost");
+                    return [4 /*yield*/, rest.get("/api/values")];
+                case 1:
+                    res = _a.sent();
+                    console.log(res.result);
                     return [2 /*return*/];
-                }
-                console.log('Hello', inputString);
             }
-            catch (err) {
-                tl.setResult(tl.TaskResult.Failed, err.message);
-            }
-            return [2 /*return*/];
         });
     });
 }
