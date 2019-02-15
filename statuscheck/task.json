@@ -20,6 +20,14 @@
             "defaultValue": "",
             "required": true,
             "helpMarkDown": "A sample string"
+        },
+        {
+            "name": "ghpat",
+            "type": "string",
+            "label": "GitHub Personal Access Token",
+            "defaultValue": "",
+            "required": true,
+            "helpMarkDown": "Github PAT"
         }
     ],
     "execution": {

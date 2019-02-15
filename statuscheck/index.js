@@ -44,29 +44,97 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var tl = require("azure-pipelines-task-lib/task");
 var rm = __importStar(require("typed-rest-client/RestClient"));
+var Octokit = require("@octokit/rest");
 function run() {
     return __awaiter(this, void 0, void 0, function () {
-        var inputString, rest, res;
+        var gh_pat, inputString, octokit, err_1;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    try {
-                        inputString = tl.getInput('samplestring', true);
-                        if (inputString == 'bad') {
-                            tl.setResult(tl.TaskResult.Failed, 'Bad input was given');
-                            return [2 /*return*/];
-                        }
-                        console.log('Hello', inputString);
+                    _a.trys.push([0, 2, , 3]);
+                    gh_pat = tl.getInput('ghpat', true);
+                    inputString = tl.getInput('samplestring', true);
+                    if (inputString == 'bad') {
+                        tl.setResult(tl.TaskResult.Failed, 'Bad input was given');
+                        return [2 /*return*/];
                     }
-                    catch (err) {
-                        tl.setResult(tl.TaskResult.Failed, err.message);
-                    }
-                    rest = new rm.RestClient("todos", "http://localhost");
-                    return [4 /*yield*/, rest.get("/api/values")];
+                    console.log('Hello', inputString);
+                    octokit = new Octokit({
+                        auth: 'token ' + gh_pat
+                    });
+                    return [4 /*yield*/, runTest(octokit)];
                 case 1:
+                    _a.sent();
+                    return [3 /*break*/, 3];
+                case 2:
+                    err_1 = _a.sent();
+                    tl.setResult(tl.TaskResult.Failed, err_1.message);
+                    return [3 /*break*/, 3];
+                case 3: return [2 /*return*/];
+            }
+        });
+    });
+}
+function runTest(octokit) {
+    return __awaiter(this, void 0, void 0, function () {
+        var i, rest, i, res;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    i = 1;
+                    _a.label = 1;
+                case 1:
+                    if (!(i <= 3)) return [3 /*break*/, 4];
+                    return [4 /*yield*/, octokit.repos.createStatus({
+                            owner: "thehabbos007",
+                            repo: "CodeChallenge",
+                            sha: "7a4c3b9ca6cbeebfd8e620df4aafca32d2ba52f7",
+                            state: "pending",
+                            description: "test" + i,
+                            context: "pipeline/test/" + i
+                        })];
+                case 2:
+                    _a.sent();
+                    _a.label = 3;
+                case 3:
+                    i++;
+                    return [3 /*break*/, 1];
+                case 4:
+                    rest = new rm.RestClient("todos", "http://localhost:5000");
+                    i = 1;
+                    _a.label = 5;
+                case 5:
+                    if (!(i <= 3)) return [3 /*break*/, 11];
+                    return [4 /*yield*/, rest.get("/api/values/end" + i)];
+                case 6:
                     res = _a.sent();
-                    console.log(res.result);
-                    return [2 /*return*/];
+                    if (!(res.result == "value" + i)) return [3 /*break*/, 8];
+                    return [4 /*yield*/, octokit.repos.createStatus({
+                            owner: "thehabbos007",
+                            repo: "CodeChallenge",
+                            sha: "7a4c3b9ca6cbeebfd8e620df4aafca32d2ba52f7",
+                            state: "success",
+                            description: "test" + i,
+                            context: "pipeline/test/" + i
+                        })];
+                case 7:
+                    _a.sent();
+                    return [3 /*break*/, 10];
+                case 8: return [4 /*yield*/, octokit.repos.createStatus({
+                        owner: "thehabbos007",
+                        repo: "CodeChallenge",
+                        sha: "7a4c3b9ca6cbeebfd8e620df4aafca32d2ba52f7",
+                        state: "failure",
+                        description: "test" + i,
+                        context: "pipeline/test/" + i
+                    })];
+                case 9:
+                    _a.sent();
+                    _a.label = 10;
+                case 10:
+                    i++;
+                    return [3 /*break*/, 5];
+                case 11: return [2 /*return*/];
             }
         });
     });
