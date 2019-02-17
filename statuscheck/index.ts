@@ -6,18 +6,32 @@ import Octokit = require('@octokit/rest');
 async function run() {
     try {
         const gh_pat: string = tl.getInput('ghpat', true);
-        const inputString: string = tl.getInput('samplestring', true);
-        if (inputString == 'bad') {
+        const merge_sha: string = tl.getInput('mergesha', true);
+        if (merge_sha == 'bad') {
             tl.setResult(tl.TaskResult.Failed, 'Bad input was given');
             return;
         }
-        console.log('Hello', inputString);
+        console.log('Got merge sha: ', merge_sha);
+        /*let mergeSha = "";
+        await require('child_process').exec('git rev-parse HEAD', function(err:any, stdout:string) {
+            console.log('Merge request sha is: ', stdout);
+            mergeSha = stdout;
+        });*/
+
         const octokit = new Octokit({
             auth: 'token ' + gh_pat
         })
 
+        const result = await octokit.repos.getCommit({
+            owner: "thehabbos007", 
+            repo: "CodeChallenge", 
+            sha: merge_sha,
+        })
 
-        await runTest(octokit);
+        let sha = result.data.parents[result.data.parents.length-1].sha;
+        console.log('Parent commit sha: ', result.data.parents);
+
+        await runTest(octokit, sha);
     }
     catch (err) {
         tl.setResult(tl.TaskResult.Failed, err.message);
@@ -31,19 +45,21 @@ async function run() {
     //console.log(res.result)
 }
 
-async function runTest(octokit: Octokit){
+async function runTest(octokit: Octokit, sha: string){
+    console.log('Operating on commit :', sha);
+
     for (var i = 1; i <= 3; i++) {
         await octokit.repos.createStatus({
             owner: "thehabbos007", 
             repo: "CodeChallenge", 
-            sha:"7a4c3b9ca6cbeebfd8e620df4aafca32d2ba52f7",
+            sha: sha,
             state: "pending", 
             description: "test" + i, 
             context: "pipeline/test/" + i
         })    
     }
 
-    let rest: rm.RestClient = new rm.RestClient("todos", "http://localhost:5000");    
+    let rest: rm.RestClient = new rm.RestClient("todos", "http://localhost");    
     for (var i = 1; i <= 3; i++) {
         let res: rm.IRestResponse<any> = await rest.get<any>("/api/values/end"+ i);
 
@@ -51,7 +67,7 @@ async function runTest(octokit: Octokit){
             await octokit.repos.createStatus({
                 owner: "thehabbos007", 
                 repo: "CodeChallenge", 
-                sha:"7a4c3b9ca6cbeebfd8e620df4aafca32d2ba52f7",
+                sha: sha,
                 state: "success", 
                 description: "test" + i, 
                 context: "pipeline/test/" + i
@@ -60,14 +76,13 @@ async function runTest(octokit: Octokit){
             await octokit.repos.createStatus({
                 owner: "thehabbos007", 
                 repo: "CodeChallenge", 
-                sha:"7a4c3b9ca6cbeebfd8e620df4aafca32d2ba52f7",
+                sha: sha,
                 state: "failure", 
                 description: "test" + i, 
                 context: "pipeline/test/" + i
             })   
         }
-    }
-    
+    }    
 
 }
 

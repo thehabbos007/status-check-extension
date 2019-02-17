@@ -47,40 +47,50 @@ var rm = __importStar(require("typed-rest-client/RestClient"));
 var Octokit = require("@octokit/rest");
 function run() {
     return __awaiter(this, void 0, void 0, function () {
-        var gh_pat, inputString, octokit, err_1;
+        var gh_pat, merge_sha, octokit, result, sha, err_1;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    _a.trys.push([0, 2, , 3]);
+                    _a.trys.push([0, 3, , 4]);
                     gh_pat = tl.getInput('ghpat', true);
-                    inputString = tl.getInput('samplestring', true);
-                    if (inputString == 'bad') {
+                    merge_sha = tl.getInput('mergesha', true);
+                    if (merge_sha == 'bad') {
                         tl.setResult(tl.TaskResult.Failed, 'Bad input was given');
                         return [2 /*return*/];
                     }
-                    console.log('Hello', inputString);
+                    console.log('Got merge sha: ', merge_sha);
                     octokit = new Octokit({
                         auth: 'token ' + gh_pat
                     });
-                    return [4 /*yield*/, runTest(octokit)];
+                    return [4 /*yield*/, octokit.repos.getCommit({
+                            owner: "thehabbos007",
+                            repo: "CodeChallenge",
+                            sha: merge_sha,
+                        })];
                 case 1:
-                    _a.sent();
-                    return [3 /*break*/, 3];
+                    result = _a.sent();
+                    sha = result.data.parents[result.data.parents.length - 1].sha;
+                    console.log('Parent commit sha: ', result.data.parents);
+                    return [4 /*yield*/, runTest(octokit, sha)];
                 case 2:
+                    _a.sent();
+                    return [3 /*break*/, 4];
+                case 3:
                     err_1 = _a.sent();
                     tl.setResult(tl.TaskResult.Failed, err_1.message);
-                    return [3 /*break*/, 3];
-                case 3: return [2 /*return*/];
+                    return [3 /*break*/, 4];
+                case 4: return [2 /*return*/];
             }
         });
     });
 }
-function runTest(octokit) {
+function runTest(octokit, sha) {
     return __awaiter(this, void 0, void 0, function () {
         var i, rest, i, res;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
+                    console.log('Operating on commit :', sha);
                     i = 1;
                     _a.label = 1;
                 case 1:
@@ -88,7 +98,7 @@ function runTest(octokit) {
                     return [4 /*yield*/, octokit.repos.createStatus({
                             owner: "thehabbos007",
                             repo: "CodeChallenge",
-                            sha: "7a4c3b9ca6cbeebfd8e620df4aafca32d2ba52f7",
+                            sha: sha,
                             state: "pending",
                             description: "test" + i,
                             context: "pipeline/test/" + i
@@ -100,7 +110,7 @@ function runTest(octokit) {
                     i++;
                     return [3 /*break*/, 1];
                 case 4:
-                    rest = new rm.RestClient("todos", "http://localhost:5000");
+                    rest = new rm.RestClient("todos", "http://localhost");
                     i = 1;
                     _a.label = 5;
                 case 5:
@@ -112,7 +122,7 @@ function runTest(octokit) {
                     return [4 /*yield*/, octokit.repos.createStatus({
                             owner: "thehabbos007",
                             repo: "CodeChallenge",
-                            sha: "7a4c3b9ca6cbeebfd8e620df4aafca32d2ba52f7",
+                            sha: sha,
                             state: "success",
                             description: "test" + i,
                             context: "pipeline/test/" + i
@@ -123,7 +133,7 @@ function runTest(octokit) {
                 case 8: return [4 /*yield*/, octokit.repos.createStatus({
                         owner: "thehabbos007",
                         repo: "CodeChallenge",
-                        sha: "7a4c3b9ca6cbeebfd8e620df4aafca32d2ba52f7",
+                        sha: sha,
                         state: "failure",
                         description: "test" + i,
                         context: "pipeline/test/" + i
